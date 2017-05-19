@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>DNS-over-HTTPS with Google Public DNS</title>
+<style type="text/css">
+#domain {
+  font: 1.4rem monospace;
+  padding: 0.2em 0.4em;
+  width: 14em;
+}
+#execute {
+  font-size: 1.2rem;
+  padding: 0.4em 1.4em;
+}
+
+.label {
+  color: #aaa;
+  font-size: 1.2rem;
+}
+input:checked + .label {
+  color: #000;
+  font-weight: bold;
+}
+
+#rcode {
+  margin: 0.2em 0;
+}
+#comment {
+  color: #888;
+  font: 0.8rem/1.4 sans-serif;
+}
+
+#status {
+  padding: 0;
+  list-style-type: none;
+}
+#status li:not([class]) {
+  display: none;
+}
+.good::before {
+  content: "Validated with";
+  color: #080;
+  padding-right: 0.4em;
+}
+.bad::before {
+  content: "Not validated with";
+  color: #f00;
+  padding-right: 0.4em;
+}
+
+#records {
+  min-width: 60vw;
+  font: 0.8rem/1.4 monospace;
+}
+#records tr:nth-child(odd) {
+  background: #eee;
+}
+
+#records th, #records td {
+  padding: 0.4em 0.8em;
+}
+
+#records td:nth-child(2) {
+  text-align: right;
+}
+#records td:last-child {
+  max-width: 60vw;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+#raw {
+  white-space: pre;
+  background: #eee;
+  padding: 0.4em;
+  font: 0.8rem/1.4 monospace;
+  width: 80vw;
+  max-height: 40vh;
+  overflow: auto;
+  border: 0.4em #eee solid;
+}
+</style>
+<script type="text/javascript">
+'use strict';
+
+const rcode2str = rcode => {
+  switch (rcode) {
+    case 0: return 'NOERROR';
+    case 2: return 'SERVFAIL';
+    case 3: return 'NXDOMAIN';
+    default: return `RCODE: ${rcode}`;
+  }
+};
+
+const rrtype2str = rr => {
+  switch (rr) {
+    case   1: return 'A';
+    case   2: return 'NS';
+    case   5: return 'CNAME';
+    case   6: return 'SOA';
+    case  12: return 'PTR';
+    case  13: return 'HINFO';
+    case  15: return 'MX';
+    case  16: return 'TXT';
+    case  28: return 'AAAA';
+    case  33: return 'SRV';
+    case  46: return 'RRSIG';
+    case  47: return 'NSEC';
+    case  48: return 'DNSKEY';
+    case  51: return 'NSEC3PARAM';
+    case  99: return 'SPF';
+    case 255: return 'ANY';
+    case 257: return 'CAA';
+    default: return rr.toString();
+  }
+};
+
+const xhr = function(domain, type) {
+  let xhr = new XMLHttpRequest();
+
+  xhr.onload    = function() { html(xhr); };
+  xhr.onerror   = function() { html(xhr); };
+  xhr.ontimeout = function() { html(xhr); };
+
+  xhr.open('GET', `https://dns.google.com/resolve?name=${encodeURIComponent(domain)}&type=${encodeURIComponent(type)}`, true);
+  xhr.timeout = 10000;
+  xhr.responseType = 'json';
+  xhr.send();
+};
+
+
+const activate = function() {
+  document.getElementById('execute').disabled = (document.getElementById('domain').value.trim().length < 1);
+};
+
+const submit = function(ev) {
+  if (ev.keyCode === 13) {
+    execute();
+  }
+};
+
+const execute = function() {
+  activate();
+  if (document.getElementById('execute').disabled) {
+    return;
+  }
+
+  let domain = document.getElementById('domain').value.trim();
+  if (domain.length > 0) {
+    let types = document.getElementsByName('type');
+    for (const type of types) {
+      if (type.checked) {
+        document.getElementById('execute').disabled = true;
+        xhr(domain, type.value);
+        break;
+      }
+    }
+  }
+};
+
+const html = function(xhr) {
+  activate();
+
+  let table = document.getElementById('records');
+  let rows = table.rows.length;
+  for (let i = 1; i < rows; i++) {
+    table.deleteRow(1);
+  }
+
+  if (xhr.readyState === 4 && xhr.status === 200 && xhr.response) {
+    let result = xhr.response;
+
+    document.getElementById('rcode').textContent = rcode2str(result.Status);
+    document.getElementById('comment').textContent = result.Comment;
+
+    document.getElementById('dnssec').className = result.AD ? 'good' : 'bad';
+
+    document.getElementById('raw').textContent = JSON.stringify(result, null, 2);
+
+    let records = (result.Answer ? result.Answer : result.Authority).sort(function(x, y) {
+      if (x.type > y.type) return  1;
+      if (x.type < y.type) return -1;
+      return x.data > y.data ? 1 : -1;
+    });
+
+    for (const record of records) {
+      let row = table.insertRow(-1);
+      row.insertCell(-1).appendChild(document.createTextNode(record.name));
+      row.insertCell(-1).appendChild(document.createTextNode(record.TTL));
+      row.insertCell(-1).appendChild(document.createTextNode(rrtype2str(record.type)));
+      row.insertCell(-1).appendChild(document.createTextNode(record.data));
+    }
+  }
+  else {
+    document.getElementById('rcode').textContent = 'CONNECTION FAILED';
+    document.getElementById('comment').textContent = 'Failed to connect to Google Public DNS service';
+
+    document.getElementById('dnssec').removeAttribute('class');
+
+    document.getElementById('raw').textContent = 'n/a';
+  }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('domain').addEventListener('keyup', activate);
+  document.getElementById('domain').addEventListener('keydown', submit);
+  document.getElementById('execute').addEventListener('click', execute);
+
+  let types = document.getElementsByName('type');
+  for (const type of types) {
+    type.addEventListener('click', execute);
+  }
+});
+</script>
+</head>
+<body>
+
+<main>
+
+  <input id="domain" type="text" placeholder="example.com" autofocus="autofocus" />
+  <input id="execute" type="button" value="Resolve" disabled="disabled" />
+
+  <label><input type="radio" name="type" value="a" /><span class="label">A</span></label>
+  <label><input type="radio" name="type" value="aaaa" /><span class="label">AAAA</span></label>
+  <label><input type="radio" name="type" value="cname" /><span class="label">CNAME</span></label>
+  <label><input type="radio" name="type" value="mx" /><span class="label">MX</span></label>
+  <label><input type="radio" name="type" value="ns" /><span class="label">NS</span></label>
+  <label><input type="radio" name="type" value="txt" /><span class="label">TXT</span></label>
+  <label><input type="radio" name="type" value="any" checked="checked" /><span class="label">ANY</span></label>
+
+  <hr />
+
+  <h1 id="rcode">DNS-over-HTTPS with Google Public DNS</h1>
+  <div id="comment">&nbsp;</div>
+
+  <ul id="status">
+    <li id="dnssec">DNSSEC</li>
+  </ul>
+
+  <table id="records">
+    <tr>
+      <th>name</th>
+      <th>ttl</th>
+      <th>type</th>
+      <th>record</th>
+    </tr>
+  </table>
+
+  <hr />
+
+  <div id="raw">n/a</div>
+
+</main>
+
+<hr />
+
+<aside>
+
+  <h2>References</h2>
+
+  <ul>
+    <li><a href="https://developers.google.com/speed/public-dns/docs/dns-over-https">DNS-over-HTTPS | Public DNS | Google Developers</a></li>
+    <li><a href="https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml">Domain Name System (DNS) Parameters</a></li>
+  </ul>
+
+  <h2>Favicon</h2>
+
+  <ul>
+    <li><a href="https://material.io/icons/#ic_dns">Material icons - Material Design</a></li>
+  </ul>
+
+</aside>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-gae-dns-https
+DNS-over-HTTPS front-end on App Engine
 ====================
 A front-end for DNS-over-HTTPS with Google Public DNS hosted on Google App Engine.
 
@@ -14,4 +14,6 @@ gcloud app deploy
 
 Icon
 --------------------
-`dns.png` and `www/favicon.ico` are originally distributed at [Material icons - Material Design](https://material.io/icons/#ic_dns) under the Apache License Version 2.0.
+`dns.png` is originally distributed at [Material icons - Material Design](https://material.io/icons/#ic_dns) under the Apache License Version 2.0.
+
+`www/favicon.ico` is created from `dns.png`.

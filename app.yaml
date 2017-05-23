@@ -3,10 +3,9 @@ api_version: 1
 threadsafe: true
 
 handlers:
-- url: /
-  static_files: index.html
-  upload: index.html
-
-- url: /(.*)
-  static_files: www/\1
-  upload: www/(.*)
+  - url: /
+    static_files: index.html
+    upload: index.html
+  - url: /(.*)
+    static_files: www/\1
+    upload: www/(.*)

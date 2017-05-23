@@ -135,16 +135,12 @@ const activate = function() {
 };
 
 const submit = function(ev) {
-  if (ev.keyCode === 13) {
-    execute();
-  }
+  if (ev.keyCode === 13) execute();
 };
 
 const execute = function() {
   activate();
-  if (document.getElementById('execute').disabled) {
-    return;
-  }
+  if (document.getElementById('execute').disabled) return;
 
   let domain = document.getElementById('domain').value.trim();
   if (domain.length > 0) {

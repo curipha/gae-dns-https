@@ -9,7 +9,7 @@ Deploy
 ```bash
 git clone https://github.com/curipha/gae-dns-https.git
 cd gae-dns-https/
-gcloud app deploy
+gcloud --quiet app deploy
 ```
 
 Icon

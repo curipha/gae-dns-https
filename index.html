@@ -94,6 +94,7 @@ const rcode2str = rcode => {
     case 0: return 'NOERROR';
     case 2: return 'SERVFAIL';
     case 3: return 'NXDOMAIN';
+    case 4: return 'Not Implemented';
     default: return `RCODE: ${rcode}`;
   }
 };

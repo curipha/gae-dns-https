@@ -184,7 +184,7 @@ const html = function(xhr) {
 
     document.getElementById('raw').textContent = JSON.stringify(result, null, 2);
 
-    let records = (result.Answer ? result.Answer : result.Authority).sort(function(x, y) {
+    let records = (result.Answer || result.Authority || []).sort(function(x, y) {
       if (x.type > y.type) return  1;
       if (x.type < y.type) return -1;
       return x.data > y.data ? 1 : -1;

@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<title>DNS-over-HTTPS with Google Public DNS</title>
+<title>DNS-over-HTTPS with Google Public DNS / Cloudflare Resolver</title>
 <style type="text/css">
 #domain {
   font: 1.4rem monospace;
@@ -12,6 +12,11 @@
 #execute {
   font-size: 1.2rem;
   padding: 0.4em 1.4em;
+}
+
+#provider {
+  font-size: 1.2rem;
+  padding: 0.2rem;
 }
 
 .label {
@@ -116,6 +121,11 @@ const rrtype2str = rr => {
   }
 };
 
+const dns_provider = {
+  google: { name: 'Google Public DNS',   endpoint: (name, type) => `https://dns.google.com/resolve?name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}` },
+  cf:     { name: 'Cloudflare Resolver', endpoint: (name, type) => `https://cloudflare-dns.com/dns-query?ct=application/dns-json&name=${encodeURIComponent(name)}&type=${encodeURIComponent(type.toUpperCase())}` }
+};
+
 const xhr = function(domain, type) {
   let xhr = new XMLHttpRequest();
 
@@ -123,7 +133,7 @@ const xhr = function(domain, type) {
   xhr.onerror   = function() { html(xhr); };
   xhr.ontimeout = function() { html(xhr); };
 
-  xhr.open('GET', `https://dns.google.com/resolve?name=${encodeURIComponent(domain)}&type=${encodeURIComponent(type)}`, true);
+  xhr.open('GET', dns_provider[document.getElementById('provider').value].endpoint(domain, type), true);
   xhr.timeout = 10000;
   xhr.responseType = 'json';
   xhr.send();
@@ -189,7 +199,7 @@ const html = function(xhr) {
   }
   else {
     document.getElementById('rcode').textContent = 'CONNECTION FAILED';
-    document.getElementById('comment').textContent = 'Failed to connect to Google Public DNS service';
+    document.getElementById('comment').textContent = `Failed to connect to ${dns_provider[document.getElementById('provider').value].name} service`;
 
     document.getElementById('dnssec').removeAttribute('class');
 
@@ -202,9 +212,21 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('domain').addEventListener('keydown', submit);
   document.getElementById('execute').addEventListener('click', execute);
 
+  document.getElementById('provider').addEventListener('change', execute);
+
   let types = document.getElementsByName('type');
   for (const type of types) {
     type.addEventListener('click', execute);
+  }
+
+  let select_dns = document.getElementById('provider');
+  let providers = Object.keys(dns_provider);
+  for (const provider of providers) {
+    let dns = document.createElement('option');
+    dns.setAttribute('value', provider);
+    dns.textContent = dns_provider[provider].name;
+
+    select_dns.appendChild(dns);
   }
 });
 </script>
@@ -216,6 +238,8 @@ document.addEventListener('DOMContentLoaded', function() {
   <input id="domain" type="text" placeholder="example.com" autofocus="autofocus" />
   <input id="execute" type="button" value="Resolve" disabled="disabled" />
 
+  <select id="provider" name="provider"></select>
+
   <label><input type="radio" name="type" value="a" /><span class="label">A</span></label>
   <label><input type="radio" name="type" value="aaaa" /><span class="label">AAAA</span></label>
   <label><input type="radio" name="type" value="cname" /><span class="label">CNAME</span></label>
@@ -226,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   <hr />
 
-  <h1 id="rcode">DNS-over-HTTPS with Google Public DNS</h1>
+  <h1 id="rcode">DNS-over-HTTPS with Google Public DNS / Cloudflare Resolver</h1>
   <div id="comment">&nbsp;</div>
 
   <ul id="status">
@@ -256,6 +280,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   <ul>
     <li><a href="https://developers.google.com/speed/public-dns/docs/dns-over-https">DNS-over-HTTPS | Public DNS | Google Developers</a></li>
+    <li><a href="https://developers.cloudflare.com/1.1.1.1/dns-over-https/">DNS over HTTPS - Cloudflare Resolver</a></li>
     <li><a href="https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml">Domain Name System (DNS) Parameters</a></li>
   </ul>
 

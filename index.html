@@ -178,7 +178,7 @@ const html = function(xhr) {
     let result = xhr.response;
 
     document.getElementById('rcode').textContent = rcode2str(result.Status);
-    document.getElementById('comment').textContent = result.Comment;
+    document.getElementById('comment').textContent = result.Comment || '';
 
     document.getElementById('dnssec').className = result.AD ? 'good' : 'bad';
 

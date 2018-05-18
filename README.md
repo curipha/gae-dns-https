@@ -1,6 +1,6 @@
 DNS-over-HTTPS front-end on App Engine
 ====================
-A front-end for DNS-over-HTTPS with Google Public DNS hosted on Google App Engine.
+A front-end for DNS-over-HTTPS with Google Public DNS / Cloudflare Resolver hosted on Google App Engine.
 
 https://dns-https.appspot.com/
 

@@ -125,7 +125,7 @@ const rrtype2str = rr => {
 };
 
 const dns_provider = {
-  google: { name: 'Google Public DNS',   endpoint: (name, type) => `https://dns.google.com/resolve?name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}` },
+  google: { name: 'Google Public DNS',   endpoint: (name, type) => `https://dns.google.com/resolve?ct=application/x-javascript&name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}` },
   cf:     { name: 'Cloudflare Resolver', endpoint: (name, type) => `https://cloudflare-dns.com/dns-query?ct=application/dns-json&name=${encodeURIComponent(name)}&type=${encodeURIComponent(type.toUpperCase())}` },
   quad9:  { name: 'Quad9 DNS Server',    endpoint: (name, type) => `https://dns.quad9.net:5053/dns-query?name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}` },
 };

@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8" />
-<title>DNS-over-HTTPS with Google Public DNS / Cloudflare Resolver</title>
+<title>DNS-over-HTTPS with Public DNS</title>
 <style type="text/css">
 #domain {
   font: 1.4rem monospace;
@@ -126,7 +126,8 @@ const rrtype2str = rr => {
 
 const dns_provider = {
   google: { name: 'Google Public DNS',   endpoint: (name, type) => `https://dns.google.com/resolve?name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}` },
-  cf:     { name: 'Cloudflare Resolver', endpoint: (name, type) => `https://cloudflare-dns.com/dns-query?ct=application/dns-json&name=${encodeURIComponent(name)}&type=${encodeURIComponent(type.toUpperCase())}` }
+  cf:     { name: 'Cloudflare Resolver', endpoint: (name, type) => `https://cloudflare-dns.com/dns-query?ct=application/dns-json&name=${encodeURIComponent(name)}&type=${encodeURIComponent(type.toUpperCase())}` },
+  quad9:  { name: 'Quad9 DNS Server',    endpoint: (name, type) => `https://dns.quad9.net:5053/dns-query?name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}` },
 };
 
 const xhr = function(domain, type) {
@@ -254,7 +255,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   <hr />
 
-  <h1 id="rcode">DNS-over-HTTPS with Google Public DNS / Cloudflare Resolver</h1>
+  <h1 id="rcode">DNS-over-HTTPS with Public DNS</h1>
   <div id="comment">&nbsp;</div>
 
   <ul id="status">
@@ -285,6 +286,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <ul>
     <li><a href="https://developers.google.com/speed/public-dns/docs/dns-over-https">DNS-over-HTTPS | Public DNS | Google Developers</a></li>
     <li><a href="https://developers.cloudflare.com/1.1.1.1/dns-over-https/">DNS over HTTPS - Cloudflare Resolver</a></li>
+    <li><a href="https://www.quad9.net/doh-quad9-dns-servers/">DoH Support via Quad9 DNS &bull; Quad 9</a></li>
     <li><a href="https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml">Domain Name System (DNS) Parameters</a></li>
   </ul>
 

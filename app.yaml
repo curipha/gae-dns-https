@@ -1,10 +1,4 @@
-runtime: python27
-api_version: 1
-threadsafe: true
-
-skip_files:
-  - ^(.*/)?\..*$
-  - ^(.*/)?.*\.png$
+runtime: python37
 
 handlers:
   - url: /

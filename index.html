@@ -132,6 +132,7 @@ const dns_provider = {
   cf: {
     name: 'Cloudflare Resolver',
     endpoint: (name, type) => `https://cloudflare-dns.com/dns-query?name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}`,
+    contenttype: 'application/dns-json',
   },
   quad9: {
     name: 'Quad9 DNS Server',
@@ -147,6 +148,9 @@ const xhr = function(domain, type) {
   xhr.ontimeout = function() { html(xhr); };
 
   xhr.open('GET', dns_provider[document.getElementById('provider').value].endpoint(domain, type), true);
+  if (dns_provider[document.getElementById('provider').value].contenttype) {
+    xhr.setRequestHeader('accept', dns_provider[document.getElementById('provider').value].contenttype)
+  }
   xhr.timeout = 10000;
   xhr.responseType = 'json';
   xhr.send();

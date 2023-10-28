@@ -151,7 +151,8 @@ const xhr = function(domain, type) {
   if (dns_provider[document.getElementById('provider').value].contenttype) {
     xhr.setRequestHeader('accept', dns_provider[document.getElementById('provider').value].contenttype)
   }
-  xhr.timeout = 10000;
+
+  xhr.timeout = 4000; // milliseconds
   xhr.responseType = 'json';
   xhr.send();
 };

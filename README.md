@@ -14,6 +14,6 @@ gcloud --quiet app deploy --no-cache
 
 Icon
 --------------------
-`dns.png` is originally distributed at [Material icons - Material Design](https://material.io/icons/#ic_dns) under the Apache License Version 2.0.
+`dns.png` is originally distributed at [Material icons](https://fonts.google.com/icons?selected=Material%20Icons%3Adns%3A) under the Apache License Version 2.0.
 
 `www/favicon.ico` is created from `dns.png`.
